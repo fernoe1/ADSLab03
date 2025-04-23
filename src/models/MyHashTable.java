@@ -4,6 +4,7 @@ public class MyHashTable<K, V> {
     private class HashNode<K, V> {
         private K key;
         private V val;
+        private HashNode<K, V> next;
 
         public HashNode(K key, V val) {
             this.key = key;
@@ -15,34 +16,113 @@ public class MyHashTable<K, V> {
     private int size;
 
     public MyHashTable() {
-
+        chainArr = (HashNode<K, V>[]) new HashNode[M];
     }
 
     public MyHashTable(int M) {
-
+        chainArr = (HashNode<K, V>[]) new HashNode[M];
     }
 
     private int hash(K key) {
-        return 0;
+        return Math.abs(key.hashCode());
     }
 
     public void put(K key, V value) {
+        int index = hash(key) % M;
+        if (chainArr[index] == null) {
+            chainArr[index] = new HashNode<>(key, value);
+        } else {
+            HashNode<K, V> root = chainArr[index];
+            while (root != null) {
+                if (root.key.equals(key)) {
+                    root.val = value;
 
+                    return;
+                }
+                if (root.next == null) {
+                    root.next = new HashNode<>(key, value);
+
+                    return;
+                }
+                root = root.next;
+            }
+        }
     }
 
     public V get(K key) {
-        return null;
+        try {
+            return findNode(chainArr[hash(key) % M], key).val;
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+
+    private HashNode<K, V> findNode(HashNode<K, V> root, K key) throws NullPointerException {
+        while (root != null) {
+            if (root.key.equals(key)) {
+
+                return root;
+            }
+            root = root.next;
+        }
+
+        throw new NullPointerException("A " + key + " key does not exist");
     }
 
     public V remove(K key) {
+        V value = null;
+        HashNode<K, V> current = chainArr[hash(key) % M];
+        HashNode<K, V> previous = null;
+        while (current != null) {
+            if (current.key.equals(key)) {
+                if (previous == null) {
+                    if (current.next == null) {
+                        value = current.val;
+                        chainArr[hash(key) % M] = null;
+
+                        return value;
+                    }
+                } else {
+                    value = current.val;
+                    previous.next = current.next;
+
+                    return value;
+                }
+            }
+            previous = current;
+            current = current.next;
+        }
+
         return null;
     }
 
     public boolean contains(V value) {
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> current = chainArr[i];
+            while (current != null) {
+                if (current.val.equals(value)) {
+
+                    return true;
+                }
+                current = current.next;
+            }
+        }
+
         return false;
     }
 
     public K getKey(V value) {
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> current = chainArr[i];
+            while (current != null) {
+                if (current.val.equals(value)) {
+
+                    return current.key;
+                }
+                current = current.next;
+            }
+        }
+
         return null;
     }
 }
