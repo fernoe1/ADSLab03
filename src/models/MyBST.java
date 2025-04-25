@@ -23,7 +23,13 @@ public class MyBST<K extends Comparable<K>, V> {
 
         MyNode<K, V> current = root;
         while (current != null) {
-            if (key.compareTo(current.key) > 0 || key.compareTo(current.key) == 0) {
+            if (key.compareTo(current.key) == 0) {
+                current.val = val;
+
+                return;
+            }
+
+            if (key.compareTo(current.key) > 0) {
                 if (current.right == null) {
                     current.right = new MyNode<>(key, val);
 
@@ -74,59 +80,89 @@ public class MyBST<K extends Comparable<K>, V> {
 
     public void delete(K key) {
         MyNode<K, V> current = root;
-        MyNode<K, V> previous = null;
+        MyNode<K, V> parent = null;
 
         while (current != null) {
             if (key.compareTo(current.key) == 0) {
+
+                // leaf
                 if (current.left == null && current.right == null) {
-                    if (key.compareTo(previous.key) > 0) {
-                        previous.right = null;
-                    }
-
-                    if (key.compareTo(previous.key) < 0) {
-                        previous.left = null;
+                    if (parent == null) {
+                        root = null;
+                    } else if (parent.left == current) {
+                        parent.left = null;
+                    } else {
+                        parent.right = null;
                     }
 
                     return;
                 }
 
+                // two children
                 if (current.left != null && current.right != null) {
-                    MyNode<K, V> inOrder = current;
+                    MyNode<K, V> inOrder = findInOrder(current);
+                    MyNode<K, V> inOrderParent = findInOrderParent(current);
 
-                    while (inOrder.left.left != null) {
-                        inOrder = inOrder.left;
+                    current.val = inOrder.val;
+                    current.key = inOrder.key;
+                    if (inOrder.right != null) {
+                        inOrderParent.left = inOrder.right;
+                    } else if (inOrderParent.left == inOrder) {
+                        inOrderParent.left = null;
+                    } else {
+                        inOrderParent.right = null;
                     }
-
-                    current.val = (V) inOrder.left.val;
-                    inOrder.left = null;
 
                     return;
                 }
 
-                if (current.left != null || current.right != null) {
-                    if (current.left != null) {
-                        current.val = (V) current.left.val;
-                        current.left = null;
-                    }
+                // one child
+                if (parent == null) {
+                    root = (current.left != null) ? current.left : current.right;
 
-                    if (current.right != null) {
-                        current.val = (V) current.right.val;
-                        current.right = null;
+                    return;
+                } else {
+                    if (parent.left == current) {
+                        parent.left = (current.left != null) ? current.left : current.right;
+                    } else {
+                        parent.right = (current.left != null) ? current.left : current.right;
                     }
 
                     return;
                 }
             }
 
-            previous = current;
-            if (key.compareTo(current.key) > 0) {
-                current = current.right;
-            }
+            parent = current;
             if (key.compareTo(current.key) < 0) {
                 current = current.left;
+            } else {
+                current = current.right;
             }
         }
 
+        if (current == null) {
+            throw new NullPointerException("Key " + key + " does not exist.");
+        }
+    }
+
+    private MyNode<K, V> findInOrderParent(MyNode<K, V> start) {
+        MyNode<K, V> parent = start;
+        start = start.right;
+        while (start.left != null) {
+            parent = start;
+            start = start.left;
+        }
+
+        return parent;
+    }
+
+    private MyNode<K, V> findInOrder(MyNode<K, V> start) {
+        start = start.right;
+        while (start.left != null) {
+            start = start.left;
+        }
+
+        return start;
     }
 
     public Iterable<K> iterator() {
