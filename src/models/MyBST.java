@@ -1,23 +1,40 @@
 package models;
 
-public class MyBST<K extends Comparable<K>, V> {
-    private class MyNode<K, V> {
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Stack;
+
+public class MyBST<K extends Comparable<K>, V> implements Iterable<MyBST<K, V>.MyNode<K, V>> {
+    public class MyNode<K, V> {
         private K key;
         private V val;
-        private MyNode left, right;
+        private MyNode<K, V> left, right;
 
         public MyNode(K key, V val) {
             this.key = key;
             this.val = val;
         }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return val;
+        }
     }
     private MyNode root;
     private int size;
+
+    public MyBST() {
+        size = 0;
+    }
 
     public void put(K key, V val) {
         if (root == null) {
             root = new MyNode<>(key, val);
 
+            size++;
             return;
         }
 
@@ -33,6 +50,7 @@ public class MyBST<K extends Comparable<K>, V> {
                 if (current.right == null) {
                     current.right = new MyNode<>(key, val);
 
+                    size++;
                     return;
                 }
 
@@ -43,6 +61,7 @@ public class MyBST<K extends Comparable<K>, V> {
                 if (current.left == null) {
                     current.left = new MyNode<>(key, val);
 
+                    size++;
                     return;
                 }
 
@@ -57,6 +76,10 @@ public class MyBST<K extends Comparable<K>, V> {
        } catch (NullPointerException e) {
            return null;
        }
+    }
+
+    public int getSize() {
+        return size;
     }
 
     private MyNode<K, V> findNode(MyNode<K, V> root, K key) {
@@ -95,6 +118,7 @@ public class MyBST<K extends Comparable<K>, V> {
                         parent.right = null;
                     }
 
+                    size--;
                     return;
                 }
 
@@ -113,6 +137,7 @@ public class MyBST<K extends Comparable<K>, V> {
                         inOrderParent.right = null;
                     }
 
+                    size--;
                     return;
                 }
 
@@ -120,6 +145,7 @@ public class MyBST<K extends Comparable<K>, V> {
                 if (parent == null) {
                     root = (current.left != null) ? current.left : current.right;
 
+                    size--;
                     return;
                 } else {
                     if (parent.left == current) {
@@ -128,6 +154,7 @@ public class MyBST<K extends Comparable<K>, V> {
                         parent.right = (current.left != null) ? current.left : current.right;
                     }
 
+                    size--;
                     return;
                 }
             }
@@ -165,7 +192,43 @@ public class MyBST<K extends Comparable<K>, V> {
         return start;
     }
 
-    public Iterable<K> iterator() {
-        return null;
+    @Override
+    public Iterator<MyNode<K, V>> iterator() {
+        return new MyBSTIterator();
+    }
+
+    private class MyBSTIterator implements Iterator<MyNode<K, V>> {
+        private Stack<MyNode<K, V>> stack;
+
+        public MyBSTIterator() {
+            stack = new Stack<>();
+            moveLeft(root);
+        }
+
+        private void moveLeft(MyNode<K, V> current) {
+            while (current != null) {
+                stack.push(current);
+                current = current.left;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+
+        @Override
+        public MyNode<K, V> next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("Stack is empty");
+            }
+
+            MyNode<K, V> current = stack.pop();
+            if (current.right != null) {
+                moveLeft(current.right);
+            }
+
+            return current;
+        }
     }
 }
