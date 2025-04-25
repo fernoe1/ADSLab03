@@ -10,6 +10,10 @@ public class UniformDistributionTest {
     public static void start() {
         MyHashTable<MyTestingClass, Student> hashTable = new MyHashTable<>();
         Random random = new Random();
+        System.out.println("---------------------------------------------");
+        System.out.println("Uniform Distribution Test");
+        System.out.println("---------------------------------------------");
+        System.out.println();
 
         for (int i = 0; i < 10000; i++) {
             MyTestingClass randomClass = new MyTestingClass(random.nextInt(10000));
