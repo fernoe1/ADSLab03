@@ -17,10 +17,28 @@ public class MyHashTable<K, V> {
 
     public MyHashTable() {
         chainArr = (HashNode<K, V>[]) new HashNode[M];
+        size = 0;
     }
 
     public MyHashTable(int M) {
+        this.M = M;
         chainArr = (HashNode<K, V>[]) new HashNode[M];
+        size = 0;
+    }
+
+    public int getM() {
+        return M;
+    }
+
+    public int getBucketSize(int index) {
+        HashNode<K, V> current = chainArr[index];
+        int size = 0;
+        while (current != null) {
+            size++;
+            current = current.next;
+        }
+
+        return size;
     }
 
     private int hash(K key) {
@@ -42,6 +60,7 @@ public class MyHashTable<K, V> {
                 if (root.next == null) {
                     root.next = new HashNode<>(key, value);
 
+                    size++;
                     return;
                 }
                 root = root.next;
@@ -80,12 +99,14 @@ public class MyHashTable<K, V> {
                         value = current.val;
                         chainArr[hash(key) % M] = null;
 
+                        size--;
                         return value;
                     }
                 } else {
                     value = current.val;
                     previous.next = current.next;
 
+                    size--;
                     return value;
                 }
             }
