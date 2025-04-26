@@ -49,6 +49,7 @@ public class MyHashTable<K, V> {
         int index = hash(key) % M;
         if (chainArr[index] == null) {
             chainArr[index] = new HashNode<>(key, value);
+            size++;
         } else {
             HashNode<K, V> root = chainArr[index];
             while (root != null) {
@@ -94,21 +95,17 @@ public class MyHashTable<K, V> {
         HashNode<K, V> previous = null;
         while (current != null) {
             if (current.key.equals(key)) {
-                if (previous == null) {
-                    if (current.next == null) {
-                        value = current.val;
-                        chainArr[hash(key) % M] = null;
-
-                        size--;
-                        return value;
-                    }
+                value = current.val;
+                if (previous == null && current.next == null) {
+                    chainArr[hash(key) % M] = null;
+                } else if (previous == null && current.next != null) {
+                    chainArr[hash(key) % M] = current.next;
                 } else {
-                    value = current.val;
                     previous.next = current.next;
-
-                    size--;
-                    return value;
                 }
+
+                size--;
+                return value;
             }
             previous = current;
             current = current.next;
